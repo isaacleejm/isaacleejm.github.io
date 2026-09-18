@@ -1,21 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#f7f7f0" />
-  <circle cx="90" cy="82" r="24" fill="#355442" />
-  <text x="81" y="96" font-family="Arial, sans-serif" font-size="38" fill="#f7f7f0">i</text>
-  <circle cx="103" cy="96" r="3" fill="#c5d590" />
-  <text x="132" y="91" font-family="Arial, sans-serif" font-size="24" fill="#242b25">Isaac Jo Min Lee</text>
-  <text x="68" y="250" font-family="Arial, sans-serif" font-size="88" letter-spacing="-5" fill="#242b25">Curiosity,</text>
-  <text x="68" y="343" font-family="Arial, sans-serif" font-size="88" letter-spacing="-5" fill="#242b25">turned into</text>
-  <text x="68" y="436" font-family="Arial, sans-serif" font-size="88" letter-spacing="-5" fill="#355442">software.</text>
-  <g transform="translate(735 166) scale(1.15)">
-    <path d="M20 152v-70l97-55 108 62v62l-97 56L20 152Z" fill="#dce6d8" stroke="#355442" stroke-width="2" />
-    <path d="m20 82 108 62 97-55M128 144v63" fill="none" stroke="#355442" stroke-width="2" />
-    <path d="m40 53 88 50 78-45V17l-88-50-78 45v41Z" fill="#f7f7f0" stroke="#355442" stroke-width="2" />
-    <path d="m40 12 88 50 78-45M128 62v41" fill="none" stroke="#355442" stroke-width="2" />
-    <path d="m102 3-14 8 14 8m42 0 14 8-14 8m-16-36-9 38" fill="none" stroke="#355442" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-    <circle cx="238" cy="-10" r="7" fill="#b9cb75" />
+  <rect width="1200" height="630" fill="#0d1117" />
+  <g font-family="'DejaVu Sans Mono', 'Liberation Mono', monospace">
+    <text x="68" y="91" font-size="31" font-weight="700"><tspan fill="#79b8ff">&lt;</tspan><tspan fill="#e6edf3">IL</tspan><tspan fill="#c4a0ff">/</tspan><tspan fill="#79b8ff">&gt;</tspan></text>
+    <text x="189" y="86" font-size="15" fill="#8b949e">software portfolio</text>
+    <text x="68" y="240" font-size="82" font-weight="700" letter-spacing="-4" fill="#e6edf3">Isaac</text>
+    <text x="68" y="329" font-size="76" font-weight="700" letter-spacing="-4" fill="#79b8ff">Jo Min Lee</text>
+    <text x="71" y="391" font-size="24" fill="#e6edf3">Software development</text>
+    <text x="71" y="435" font-size="15" fill="#8b949e">Interfaces / Systems / Learning</text>
+
+    <rect x="648" y="176" width="484" height="293" rx="9" fill="#161b22" stroke="#30363d" />
+    <path d="M649 220h482" stroke="#30363d" />
+    <rect x="668" y="192" width="14" height="16" rx="2" fill="none" stroke="#79b8ff" />
+    <text x="696" y="206" font-size="14" fill="#e6edf3">profile.ts</text>
+    <circle cx="1110" cy="199" r="3" fill="#c4a0ff" />
+
+    <g font-size="15" fill="#8b949e" text-anchor="end">
+      <text x="684" y="261">1</text>
+      <text x="684" y="292">2</text>
+      <text x="684" y="323">3</text>
+      <text x="684" y="354">4</text>
+      <text x="684" y="385">5</text>
+    </g>
+    <g font-size="15" fill="#e6edf3">
+      <text x="704" y="261"><tspan fill="#c4a0ff">const</tspan> profile = {</text>
+      <text x="722" y="292">name: <tspan fill="#79b8ff">'Isaac Jo Min Lee'</tspan>,</text>
+      <text x="722" y="323">interests: [<tspan fill="#79b8ff">'Interfaces'</tspan>, <tspan fill="#79b8ff">'Systems'</tspan>],</text>
+      <text x="722" y="354">learning: <tspan fill="#79b8ff">'Software architecture'</tspan>,</text>
+      <text x="704" y="385">}</text>
+    </g>
+    <path d="M649 421h482" stroke="#30363d" />
+    <text x="670" y="451" font-size="12" fill="#8b949e">TypeScript</text>
+    <text x="1110" y="451" font-size="12" text-anchor="end" fill="#8b949e">Always learning.</text>
+
+    <path d="M70 538h1060" stroke="#30363d" />
+    <text x="70" y="579" font-size="13" letter-spacing="1.2" fill="#8b949e">PERSONAL PORTFOLIO</text>
+    <text x="1130" y="579" font-size="15" text-anchor="end" fill="#79b8ff">isaacleejm.github.io</text>
   </g>
-  <path d="M70 538h1060" stroke="#d8ddd2" />
-  <text x="70" y="580" font-family="monospace" font-size="16" fill="#657065">INTERFACES · SYSTEMS · EXPERIMENTS</text>
-  <text x="1130" y="580" text-anchor="end" font-family="monospace" font-size="16" fill="#657065">isaacleejm.github.io</text>
 </svg>

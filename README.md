@@ -4,6 +4,11 @@ A personal portfolio built with React, TypeScript and Vite, published at
 [isaacleejm.github.io](https://isaacleejm.github.io/). Project stories cover the
 problem, implementation, technology and Isaac's contribution to each project.
 
+The dark, editor-inspired interface uses blue and violet accents, a static
+TypeScript profile panel, and expandable project notes. Navigation remains a
+regular scrolling website. Project screenshots retain their original appearance;
+only their surrounding frames and the architecture diagrams follow the site theme.
+
 ## Local development
 
 Use Node.js **22.23.1**, matching CI, and npm.

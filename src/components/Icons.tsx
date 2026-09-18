@@ -30,7 +30,7 @@ export function Arrow({
 export function Mark() {
   return (
     <span className="brand-mark" aria-hidden="true">
-      i<span>.</span>
+      {'<IL />'}
     </span>
   )
 }

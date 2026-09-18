@@ -24,24 +24,21 @@ export function ProjectVisual({ media }: { media: ProjectMedia }) {
     return (
       <figure className="project-visual telly-visual">
         <div className="visual-heading">
-          <span className="visual-wordmark">
-            telly<span>space</span>
-            <span className="wordmark-dot">.</span>
-          </span>
-          <span className="visual-note">A little room for your day.</span>
+          <span className="visual-title">Task workspace</span>
+          <span className="visual-note">Flutter / Local storage</span>
         </div>
         <div className="telly-devices">
           <div className="desktop-window">
             <div className="window-bar">
-              <span />
-              <span />
-              <span />
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
               <p>Workspace / My tasks</p>
             </div>
             <img {...media.desktop} loading="lazy" />
           </div>
           <div className="phone-window">
-            <div className="phone-speaker" />
+            <div className="phone-speaker" aria-hidden="true" />
             <img {...media.mobile} loading="lazy" />
           </div>
         </div>
@@ -53,13 +50,11 @@ export function ProjectVisual({ media }: { media: ProjectMedia }) {
     return (
       <figure className="project-visual pyhelper-visual">
         <div className="visual-heading">
-          <span className="visual-wordmark">
-            <span className="code-glyph">{'</>'}</span> PyHelper
-          </span>
-          <span className="visual-note">A clearer view of your code.</span>
+          <span className="visual-title">Analysis pipeline</span>
+          <span className="visual-note">Python / Queue workers</span>
         </div>
         <div className="pipeline">
-          <div className="pipeline-label">FROM PYTHON TO FEEDBACK</div>
+          <div className="pipeline-label">SOURCE → ANALYSIS → RESULTS</div>
           <div className="flow-row">
             <FlowNode step="01" title="Submit" detail="Python source" />
             <Arrow />
@@ -82,13 +77,8 @@ export function ProjectVisual({ media }: { media: ProjectMedia }) {
   return (
     <figure className="project-visual rescan-visual">
       <div className="visual-heading">
-        <span className="visual-wordmark">
-          <span className="rescan-symbol" aria-hidden="true">
-            ▤
-          </span>{' '}
-          Rescan
-        </span>
-        <span className="visual-note">From documents to structured data.</span>
+        <span className="visual-title">Document pipeline</span>
+        <span className="visual-note">Storage / Extraction / Review</span>
       </div>
       <div className="rescan-pipeline">
         <div className="document-stack" aria-hidden="true">
@@ -107,13 +97,13 @@ export function ProjectVisual({ media }: { media: ProjectMedia }) {
             title="Upload & verify"
             detail="Document batches · S3 storage"
           />
-          <div className="flow-connector" />
+          <div className="flow-connector" aria-hidden="true" />
           <FlowNode
             step="02 / EXTRACT"
             title="Read & process"
             detail="Text extraction · OCR when needed"
           />
-          <div className="flow-connector" />
+          <div className="flow-connector" aria-hidden="true" />
           <FlowNode
             step="03 / PREPARE"
             title="Structured output"
