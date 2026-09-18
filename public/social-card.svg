@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f7f7f0" />
+  <circle cx="90" cy="82" r="24" fill="#355442" />
+  <text x="81" y="96" font-family="Arial, sans-serif" font-size="38" fill="#f7f7f0">i</text>
+  <circle cx="103" cy="96" r="3" fill="#c5d590" />
+  <text x="132" y="91" font-family="Arial, sans-serif" font-size="24" fill="#242b25">Isaac Jo Min Lee</text>
+  <text x="68" y="250" font-family="Arial, sans-serif" font-size="88" letter-spacing="-5" fill="#242b25">Curiosity,</text>
+  <text x="68" y="343" font-family="Arial, sans-serif" font-size="88" letter-spacing="-5" fill="#242b25">turned into</text>
+  <text x="68" y="436" font-family="Arial, sans-serif" font-size="88" letter-spacing="-5" fill="#355442">software.</text>
+  <g transform="translate(735 166) scale(1.15)">
+    <path d="M20 152v-70l97-55 108 62v62l-97 56L20 152Z" fill="#dce6d8" stroke="#355442" stroke-width="2" />
+    <path d="m20 82 108 62 97-55M128 144v63" fill="none" stroke="#355442" stroke-width="2" />
+    <path d="m40 53 88 50 78-45V17l-88-50-78 45v41Z" fill="#f7f7f0" stroke="#355442" stroke-width="2" />
+    <path d="m40 12 88 50 78-45M128 62v41" fill="none" stroke="#355442" stroke-width="2" />
+    <path d="m102 3-14 8 14 8m42 0 14 8-14 8m-16-36-9 38" fill="none" stroke="#355442" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="238" cy="-10" r="7" fill="#b9cb75" />
+  </g>
+  <path d="M70 538h1060" stroke="#d8ddd2" />
+  <text x="70" y="580" font-family="monospace" font-size="16" fill="#657065">INTERFACES · SYSTEMS · EXPERIMENTS</text>
+  <text x="1130" y="580" text-anchor="end" font-family="monospace" font-size="16" fill="#657065">isaacleejm.github.io</text>
+</svg>

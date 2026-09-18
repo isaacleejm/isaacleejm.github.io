@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://isaacleejm.github.io/sitemap.xml
