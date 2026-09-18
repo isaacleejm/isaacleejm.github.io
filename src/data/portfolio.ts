@@ -1,3 +1,18 @@
+export interface Education {
+  institution: string
+  qualification: string
+  period: string
+  gpa: string
+}
+
+export interface Experience {
+  organisation: string
+  role: string
+  period: string
+  location: string
+  summary: string
+}
+
 export interface Profile {
   name: string
   shortName: string
@@ -6,6 +21,9 @@ export interface Profile {
   intro: string
   about: string[]
   skills: { label: string; items: string[] }[]
+  education: Education
+  employment: Experience[]
+  community: Experience[]
 }
 
 interface ProjectScreenshot {
@@ -24,7 +42,7 @@ export type ProjectMedia =
     }
   | {
       kind: 'diagram'
-      variant: 'analysis' | 'ingestion'
+      variant: 'analysis' | 'ingestion' | 'capstone'
     }
 
 export interface Project {
@@ -33,6 +51,7 @@ export interface Project {
   title: string
   category: string
   status: string
+  period?: string
   tagline: string
   description: string
   stack: string[]
@@ -49,34 +68,151 @@ export const profile: Profile = {
   github: 'https://github.com/isaacleejm',
   linkedin: 'https://www.linkedin.com/in/isaac-jo-min-lee/',
   intro:
-    'I’m curious about how software works — from the interface you touch to the systems behind it.',
+    'I’m a developer with a computer science background from QUT. I enjoy building practical software and working through problems with a team.',
   about: [
-    'My projects span calendars, code analysis, document processing, and a smart-collar prototype. Some are personal explorations; others are collaborations where my contribution is one part of a larger idea.',
+    'My projects span an industry capstone, calendars, code analysis, and hackathon experiments. Some are personal explorations; others are collaborations where my contribution is one part of a larger idea. I’m curious about how the interface, data, and systems fit together.',
     'I like learning in small steps: get something working, understand the decisions behind it, then improve its structure. Architecture is part of that learning, and I want my projects to show the process as well as the result.',
   ],
   skills: [
     {
-      label: 'Interfaces',
-      items: ['React', 'TypeScript', 'Flutter', 'Dart', 'React Native'],
+      label: 'Languages',
+      items: [
+        'C',
+        'C#',
+        'C++',
+        'Java',
+        'Python',
+        'JavaScript',
+        'TypeScript',
+        'SQL',
+        'VB.NET',
+        'Dart',
+        'Go',
+      ],
     },
     {
-      label: 'Services & data',
-      items: ['Python', 'Flask', 'Node.js', 'PostgreSQL', 'SQLite'],
+      label: 'Web & interfaces',
+      items: [
+        'React',
+        'Next.js',
+        'Flask',
+        'Node.js',
+        'REST APIs',
+        'HTML',
+        'CSS',
+        'Vite',
+        'Flutter',
+        'React Native',
+        'WinForms',
+      ],
     },
     {
       label: 'Cloud & workflow',
-      items: ['AWS', 'Docker', 'Git', 'GitHub'],
+      items: [
+        'AWS',
+        'Azure',
+        'Docker',
+        'Terraform',
+        'Git',
+        'GitHub',
+        'CI/CD',
+        'Jira',
+      ],
+    },
+    {
+      label: 'Databases',
+      items: [
+        'PostgreSQL',
+        'MariaDB',
+        'Microsoft SQL Server',
+        'MySQL',
+        'DynamoDB',
+        'SQLite',
+      ],
+    },
+  ],
+  education: {
+    institution: 'Queensland University of Technology (QUT)',
+    qualification: 'Bachelor of Information Technology (Computer Science)',
+    period: 'Jul 2024 – Jun 2026',
+    gpa: '6.47/7.0',
+  },
+  employment: [
+    {
+      organisation: 'Woolworths Group',
+      role: 'Team Member (Casual)',
+      period: 'Aug 2025 – Present',
+      location: 'Brisbane, Australia',
+      summary:
+        'I handle POS transactions, help customers with enquiries and returns, and support stock replenishment and daily store operations.',
+    },
+    {
+      organisation: 'Lee Wah Trading Company',
+      role: 'Customer Service and Sales Assistant',
+      period: 'Jan 2019 – Jul 2024',
+      location: 'Kuala Lumpur, Malaysia',
+      summary:
+        'I managed inventory and supported POS operations, troubleshooting transaction issues and store equipment to keep daily operations running.',
+    },
+  ],
+  community: [
+    {
+      organisation: 'Code Network',
+      role: 'General Executive',
+      period: 'Sep 2024 – Sep 2025',
+      location: 'Brisbane, Australia',
+      summary:
+        'I supported technical workshops, hackathons, and networking events, and worked with the Treasurer to restore a Square Reader for event payments.',
+    },
+    {
+      organisation: 'AWS Community Day',
+      role: 'Volunteer',
+      period: 'Aug 2025',
+      location: 'Brisbane, Australia',
+      summary:
+        'I helped with attendee registration and event logistics to support the organisers and community.',
     },
   ],
 }
 
 export const projects: Project[] = [
   {
-    id: 'telly-space',
+    id: 'qut-capstone',
     number: '01',
+    title: 'QUT Industry Capstone — Mill Configuration',
+    category: 'Industry capstone',
+    status: 'Industry project',
+    period: 'Jul 2025 – Jun 2026',
+    tagline: 'Compare mill configurations. Keep the data connected.',
+    description:
+      'An industry capstone with QUT’s Centre for Agriculture and the Bioeconomy, extending Milset, a VB.NET WinForms application for mill configuration, with scenario analysis and database persistence.',
+    stack: ['VB.NET', 'WinForms', 'PostgreSQL', 'Azure', 'Jira'],
+    roleLabel: 'My contribution',
+    contribution:
+      'I acted as project manager and industry liaison, designed the PostgreSQL database with row-level security and multi-tenancy, and added scenario comparison and Azure-hosted persistence to the VB.NET application.',
+    details: [
+      {
+        heading: 'Extend an existing workflow',
+        text: 'The project extended a legacy mill-configuration application so scenarios could be compared and their data saved. A shared database also needed to keep each tenant’s data separated.',
+      },
+      {
+        heading: 'Application and database work',
+        text: 'I designed the database architecture and diagram, implemented PostgreSQL policies for row-level security and multi-tenancy, and built the scenario-analysis tool in VB.NET WinForms with PostgreSQL persistence hosted on Azure.',
+      },
+      {
+        heading: 'Delivery and documentation',
+        text: 'I used Jira to coordinate tasks, clarify requirements, track progress, and communicate with the industry partner. As team secretary, I also managed correspondence, meeting minutes, handover material, and supporting technical documentation.',
+      },
+    ],
+    media: { kind: 'diagram', variant: 'capstone' },
+  },
+  {
+    id: 'telly-space',
+    number: '02',
     title: 'Telly-Space',
     category: 'Calendar & task planning',
     status: 'In development',
+    period: '2026 – Present',
     tagline: 'Give a task a place in your day.',
     description:
       'An offline-first calendar and task planner for web and Android. Tasks can become scheduled time, calendar files can move in and out, and the data stays on the device.',
@@ -87,7 +223,7 @@ export const projects: Project[] = [
     details: [
       {
         heading: 'From a list to a plan',
-        text: 'Managing a task and finding time for it are connected actions. The app brings a task list and calendar together so tasks can be placed into a schedule and adjusted as plans change.',
+        text: 'I co-designed Telly-Space after finding it difficult to manage events across multiple calendar apps and keep track of tasks and commitments. The app brings a task list and calendar together so tasks can be placed into a schedule and adjusted as plans change.',
       },
       {
         heading: 'Different screens, familiar actions',
@@ -117,7 +253,7 @@ export const projects: Project[] = [
   },
   {
     id: 'pyhelper',
-    number: '02',
+    number: '03',
     title: 'PyHelper',
     category: 'Collaborative coursework',
     status: 'Coursework project',
@@ -155,7 +291,7 @@ export const projects: Project[] = [
   },
   {
     id: 'rescan',
-    number: '03',
+    number: '04',
     title: 'Rescan',
     category: 'AI hackathon',
     status: 'Hackathon prototype',
@@ -185,28 +321,52 @@ export const projects: Project[] = [
   },
 ]
 
-export const supportingProject: Project = {
-  id: 'pawsense',
-  number: '04',
-  title: 'PawSense',
-  category: 'Collaborative prototype',
-  status: 'Simulated collar data',
-  tagline: 'Connect a smart-collar idea to a working dashboard.',
-  description:
-    'A smart dog-collar prototype showing health, activity, location, and behavior information through a mobile interface, using simulated collar data.',
-  stack: ['React Native', 'Expo', 'JavaScript', 'Python', 'Flask'],
-  roleLabel: 'My contribution',
-  contribution:
-    'I built and refined the mock collar data source, connected it to a Flask endpoint, and wired the results into the React Native dashboard for health metrics, activity, and location.',
-  details: [
-    {
-      heading: 'Connect the parts of a team project',
-      text: 'My work linked the simulated data source, API, and dashboard. It let the interface display values returned by the service in place of disconnected placeholders.',
-    },
-    {
-      heading: 'A prototype with simulated inputs',
-      text: 'The data represents a possible collar workflow. It does not come from a physical collar, and I do not claim authorship of the team’s machine-learning model.',
-    },
-  ],
-  repoUrl: 'https://github.com/Digital2512/PawSense',
-}
+export const supportingProjects: Project[] = [
+  {
+    id: 'turtlezard',
+    number: '05',
+    title: 'Turtlezard',
+    category: 'Collaborative game hackathon',
+    status: 'Three-day project',
+    period: '2026',
+    tagline: 'Make a game together in three days.',
+    description:
+      'A Go game developed with Ebitengine during the Code Network Winter Hackathon 2026, built over three days by a team of three.',
+    stack: ['Go', 'Ebitengine'],
+    roleLabel: 'My contribution',
+    contribution:
+      'I collaborated with two other developers to design and implement gameplay mechanics, in-game UI, and game systems.',
+    details: [
+      {
+        heading: 'Build within the time available',
+        text: 'The hackathon gave our three-person team three days to make the game. We worked together on the gameplay, interface, and supporting systems using Go and Ebitengine.',
+      },
+    ],
+    repoUrl: 'https://github.com/isaacleejm/Turtlezard',
+  },
+  {
+    id: 'pawsense',
+    number: '06',
+    title: 'PawSense',
+    category: 'Collaborative prototype',
+    status: 'Simulated collar data',
+    tagline: 'Connect a smart-collar idea to a working dashboard.',
+    description:
+      'A smart dog-collar prototype showing health, activity, location, and behavior information through a mobile interface, using simulated collar data.',
+    stack: ['React Native', 'Expo', 'JavaScript', 'Python', 'Flask'],
+    roleLabel: 'My contribution',
+    contribution:
+      'I built and refined the mock collar data source, connected it to a Flask endpoint, and wired the results into the React Native dashboard for health metrics, activity, and location.',
+    details: [
+      {
+        heading: 'Connect the parts of a team project',
+        text: 'My work linked the simulated data source, API, and dashboard. It let the interface display values returned by the service in place of disconnected placeholders.',
+      },
+      {
+        heading: 'A prototype with simulated inputs',
+        text: 'The data represents a possible collar workflow. It does not come from a physical collar, and I do not claim authorship of the team’s machine-learning model.',
+      },
+    ],
+    repoUrl: 'https://github.com/Digital2512/PawSense',
+  },
+]

@@ -46,6 +46,40 @@ export function ProjectVisual({ media }: { media: ProjectMedia }) {
       </figure>
     )
   }
+  if (media.variant === 'capstone') {
+    return (
+      <figure className="project-visual capstone-visual">
+        <div className="visual-heading">
+          <span className="visual-title">Application & data</span>
+          <span className="visual-note">Desktop / Cloud persistence</span>
+        </div>
+        <div className="capstone-system">
+          <FlowNode
+            step="APPLICATION"
+            title="Milset + scenario analysis"
+            detail="VB.NET · WinForms"
+          />
+          <div className="capstone-connector" aria-hidden="true">
+            <Arrow down />
+          </div>
+          <div className="capstone-database">
+            <span className="flow-step">SHARED DATABASE</span>
+            <strong>PostgreSQL on Azure</strong>
+            <div className="tenant-policies">
+              <p>Row-level security policies</p>
+              <div className="tenant-boundaries">
+                <span>Tenant A data</span>
+                <span>Tenant B data</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <figcaption>
+          Architecture overview · Logical tenant boundaries in one database
+        </figcaption>
+      </figure>
+    )
+  }
   if (media.variant === 'analysis') {
     return (
       <figure className="project-visual pyhelper-visual">

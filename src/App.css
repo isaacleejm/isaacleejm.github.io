@@ -360,6 +360,7 @@
 }
 .project-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   font: 0.6875rem/1.5 var(--mono);
@@ -934,6 +935,229 @@
 .site-footer > .text-link {
   font-size: 0.6875rem;
 }
+.project-period {
+  color: var(--muted);
+  font: 0.6875rem/1.6 var(--mono);
+}
+
+.project-period::before {
+  content: '·';
+  margin-right: 12px;
+}
+
+.capstone-system {
+  width: 100%;
+  max-width: 410px;
+  margin: auto;
+  padding-top: 28px;
+}
+
+.capstone-system .flow-node {
+  padding: 19px;
+}
+
+.capstone-system .flow-node strong,
+.capstone-database > strong {
+  font: 500 0.9375rem/1.6 var(--mono);
+}
+
+.capstone-system .flow-node > span:last-child {
+  font-size: 0.75rem;
+}
+
+.capstone-connector {
+  display: grid;
+  place-items: center;
+  height: 43px;
+  color: var(--accent);
+}
+
+.capstone-database {
+  padding: 20px;
+  border: 1px solid #4b4264;
+  border-radius: 5px;
+  background: #1b1b2b;
+}
+
+.capstone-database > .flow-step {
+  display: block;
+  color: var(--violet);
+  margin-bottom: 9px;
+}
+
+.tenant-policies {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px dashed #67577b;
+}
+
+.tenant-policies > p {
+  color: var(--violet);
+  font: 0.6875rem/1.8 var(--mono);
+  margin-bottom: 12px;
+}
+
+.tenant-boundaries {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tenant-boundaries > span {
+  padding: 10px;
+  color: #c6bad5;
+  background: #252039;
+  border: 1px solid #4b4264;
+  border-radius: 3px;
+  text-align: center;
+  font: 0.6875rem/1.7 var(--mono);
+}
+
+.supporting-projects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 30px;
+}
+
+.supporting-projects > .supporting-project {
+  flex-direction: column;
+  margin-top: 0;
+  gap: 18px;
+}
+
+.supporting-projects .supporting-copy {
+  flex: 1;
+}
+
+.supporting-projects .text-link {
+  margin-left: 0;
+}
+
+.education-panel {
+  margin-top: 30px;
+  padding: 25px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.education-label {
+  color: var(--accent);
+  font: 400 0.75rem/1.6 var(--mono);
+  margin-bottom: 20px;
+}
+
+.education-qualification {
+  font: 500 1.0625rem/1.7 var(--mono);
+  letter-spacing: -0.025em;
+}
+
+.education-institution {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.education-period {
+  margin-top: 19px;
+  color: var(--muted);
+  font: 0.75rem/1.8 var(--mono);
+}
+
+.education-gpa {
+  display: inline-block;
+  padding: 5px 10px;
+  margin-top: 12px;
+  color: var(--syntax-green);
+  background: #182923;
+  border: 1px solid #344d42;
+  border-radius: 4px;
+  font: 0.8125rem/1.6 var(--mono);
+}
+
+.background-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 55px;
+  margin-top: 55px;
+  padding-top: 38px;
+  border-top: 1px solid var(--border);
+}
+
+.experience-group > h3 {
+  font: 500 1.1875rem/1.5 var(--mono);
+  margin-bottom: 24px;
+}
+
+.experience-list {
+  display: grid;
+  gap: 27px;
+}
+
+.experience-entry {
+  padding-left: 19px;
+  border-left: 2px solid #3f5068;
+}
+
+.experience-entry h4 {
+  font: 500 1rem/1.6 var(--mono);
+}
+
+.experience-role {
+  color: var(--accent);
+  font-size: 1rem;
+  margin-top: 6px;
+}
+
+.experience-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 15px;
+  margin-top: 9px;
+  color: var(--muted);
+  font: 0.6875rem/1.7 var(--mono);
+}
+
+.experience-summary {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-top: 12px;
+}
+
+@media (max-width: 760px) {
+  .supporting-projects,
+  .background-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .background-grid {
+    gap: 35px;
+    margin-top: 38px;
+    padding-top: 30px;
+  }
+
+  .education-panel {
+    margin-top: 25px;
+  }
+}
+
+@media (max-width: 420px) {
+  .education-panel,
+  .capstone-database {
+    padding: 18px;
+  }
+
+  .capstone-system .flow-node {
+    padding: 15px;
+  }
+
+  .tenant-boundaries > span {
+    padding: 9px 6px;
+  }
+}
+
 @media (max-width: 1080px) {
   .container {
     width: calc(100% - 64px);

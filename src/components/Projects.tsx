@@ -1,4 +1,4 @@
-import { projects, supportingProject, type Project } from '../data/portfolio'
+import { projects, supportingProjects, type Project } from '../data/portfolio'
 import { Arrow } from './Icons'
 import { ProjectVisual } from './ProjectVisual'
 
@@ -67,6 +67,9 @@ function ProjectCard({ project }: { project: Project }) {
           <div className="project-meta">
             <span className="project-number">{project.number}</span>
             <span className="project-status">{project.status}</span>
+            {project.period && (
+              <span className="project-period">{project.period}</span>
+            )}
           </div>
           <h3 id={`${project.id}-title`}>{project.title}</h3>
           <p className="project-tagline">{project.tagline}</p>
@@ -102,6 +105,41 @@ function ProjectCard({ project }: { project: Project }) {
   )
 }
 
+function SupportingProjectCard({ project }: { project: Project }) {
+  return (
+    <article
+      className="supporting-project"
+      id={project.id}
+      aria-labelledby={`${project.id}-title`}
+    >
+      <div className="supporting-copy">
+        <ProjectPath id={project.id} />
+        <h3 id={`${project.id}-title`}>{project.title}</h3>
+        <p className="eyebrow">
+          {project.category}
+          {project.period && ` · ${project.period}`}
+        </p>
+        <p>{project.description}</p>
+        <p className="supporting-contribution">{project.contribution}</p>
+        <ul className="tech-list" aria-label={`${project.title} technologies`}>
+          {project.stack.map((tech) => (
+            <li key={tech}>{tech}</li>
+          ))}
+        </ul>
+      </div>
+      {project.repoUrl && (
+        <a
+          className="text-link"
+          href={project.repoUrl}
+          aria-label={`${project.title} on GitHub`}
+        >
+          GitHub <Arrow diagonal />
+        </a>
+      )}
+    </article>
+  )
+}
+
 export function Projects() {
   return (
     <section
@@ -121,31 +159,11 @@ export function Projects() {
           <ProjectCard key={project.id} project={project} />
         ))}
       </div>
-      <article className="supporting-project" aria-labelledby="pawsense-title">
-        <div className="supporting-copy">
-          <ProjectPath id={supportingProject.id} />
-          <h3 id="pawsense-title">{supportingProject.title}</h3>
-          <p className="eyebrow">{supportingProject.category}</p>
-          <p>{supportingProject.description}</p>
-          <p className="supporting-contribution">
-            {supportingProject.contribution}
-          </p>
-          <ul className="tech-list" aria-label="PawSense technologies">
-            {supportingProject.stack.map((tech) => (
-              <li key={tech}>{tech}</li>
-            ))}
-          </ul>
-        </div>
-        {supportingProject.repoUrl && (
-          <a
-            className="text-link"
-            href={supportingProject.repoUrl}
-            aria-label="PawSense on GitHub"
-          >
-            GitHub <Arrow diagonal />
-          </a>
-        )}
-      </article>
+      <div className="supporting-projects">
+        {supportingProjects.map((project) => (
+          <SupportingProjectCard key={project.id} project={project} />
+        ))}
+      </div>
     </section>
   )
 }

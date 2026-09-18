@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { profile } from '../data/portfolio'
+import { profile, type Experience } from '../data/portfolio'
 import { Arrow, Mark } from './Icons'
 
 const navigation = [
@@ -174,6 +174,38 @@ export function Hero() {
   )
 }
 
+function ExperienceGroup({
+  id,
+  title,
+  entries,
+}: {
+  id: string
+  title: string
+  entries: Experience[]
+}) {
+  return (
+    <section className="experience-group" aria-labelledby={id}>
+      <h3 id={id}>{title}</h3>
+      <div className="experience-list">
+        {entries.map((entry) => (
+          <article
+            className="experience-entry"
+            key={`${entry.organisation}-${entry.role}-${entry.period}`}
+          >
+            <h4>{entry.organisation}</h4>
+            <p className="experience-role">{entry.role}</p>
+            <p className="experience-meta">
+              <span>{entry.period}</span>
+              {entry.location && <span> · {entry.location}</span>}
+            </p>
+            <p className="experience-summary">{entry.summary}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export function About() {
   return (
     <section className="about-section" id="about" aria-labelledby="about-title">
@@ -181,6 +213,22 @@ export function About() {
         <div>
           <p className="eyebrow section-label">02 / about</p>
           <h2 id="about-title">About me</h2>
+          <section
+            className="education-panel"
+            aria-labelledby="education-title"
+          >
+            <h3 className="education-label" id="education-title">
+              education.md
+            </h3>
+            <p className="education-qualification">
+              {profile.education.qualification}
+            </p>
+            <p className="education-institution">
+              {profile.education.institution}
+            </p>
+            <p className="education-period">{profile.education.period}</p>
+            <p className="education-gpa">GPA: {profile.education.gpa}</p>
+          </section>
         </div>
         <div className="about-copy">
           {profile.about.map((paragraph) => (
@@ -202,6 +250,18 @@ export function About() {
             ))}
           </div>
         </div>
+      </div>
+      <div className="container background-grid">
+        <ExperienceGroup
+          id="employment-title"
+          title="Work experience"
+          entries={profile.employment}
+        />
+        <ExperienceGroup
+          id="community-title"
+          title="Community"
+          entries={profile.community}
+        />
       </div>
     </section>
   )

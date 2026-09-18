@@ -33,14 +33,17 @@ The build command checks TypeScript and writes the static site to `dist/`.
 
 | Location | Purpose |
 | --- | --- |
-| `src/data/portfolio.ts` | Profile, project stories, contribution details and links |
+| `src/data/portfolio.ts` | Profile, education, experience, project stories, contribution details and links |
 | `src/components/` | Reusable interface components |
 | `src/index.css` | Global styles, theme tokens and typography |
 | `src/App.css` | Page layout and responsive styling |
 | `public/projects/` | Project screenshots and other local project assets |
 | `docs/content-sources.md` | Source evidence and project attribution notes |
 
-Edit the content file to update copy and project links. Add images to
+Edit the content file to update copy and project links. Featured case studies use
+the `projects` array; smaller project cards use `supportingProjects`. Education,
+employment and community entries belong to `profile` and share typed layouts.
+Add images to
 `public/projects/`, then reference them with `/projects/...` paths and descriptive
 alternative text in the typed project media. The editable social preview is
 `public/social-card.svg`; its PNG export is used by the metadata in `index.html`.
