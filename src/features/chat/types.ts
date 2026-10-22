@@ -1,12 +1,10 @@
-export interface ChatMessage {
-  role: 'user' | 'assistant'
-  content: string
-}
+import type { ChatMessage } from '../../../shared/chat'
+
+export type { ChatMessage } from '../../../shared/chat'
+export { MAX_MESSAGE_LENGTH } from '../../../shared/chat'
 
 export interface ChatEntry extends ChatMessage {
   id: string
 }
 
 export type ChatStatus = 'idle' | 'loading' | 'error'
-
-export const MAX_MESSAGE_LENGTH = 2000

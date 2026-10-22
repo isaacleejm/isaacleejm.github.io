@@ -1,7 +1,7 @@
 import type { ChatMessage } from './types'
 
 // Temporary, local-only responder for the first UI milestone.
-// The next milestone will replace this boundary with the conversation API.
+// The API is developed separately; the integration milestone will connect it here.
 export function requestDemoReply(
   messages: ChatMessage[],
   signal: AbortSignal,

@@ -22,6 +22,7 @@ Before publishing, run the checks and inspect the production build:
 
 ```sh
 npm run lint
+npm run test:server
 npm run build
 npm run preview
 ```
@@ -50,11 +51,81 @@ and open the Network URL printed by Vite. The UI demo supports LAN access
 over plain HTTP as well as localhost.
 
 History lives in React state: closing and reopening preserves it; refreshing
-clears it. Clear chat also cancels a pending demo reply. All feature code lives
+clears it. Clear chat also cancels a pending demo reply. The UI code lives
 in `src/features/chat/`: the widget renders the interface, `useChat` manages the
-conversation, and `chatClient` supplies simulated replies. The next milestones
-will add a local TypeScript backend and Gemini with a server-side API key,
-followed by the frontend connection. Retrieval and public hosting come later.
+conversation, and `chatClient` supplies simulated replies. A separate local
+TypeScript backend is available below. The next milestones add Gemini with a
+server-side API key, followed by the frontend connection. Retrieval and public
+hosting come later.
+
+### Local API development
+
+Start the backend in one terminal:
+
+```sh
+npm run dev:server
+```
+
+It listens at `http://127.0.0.1:3001`. `tsx` restarts it when an imported source
+file changes. Keep that terminal open; press **Ctrl+C** to stop it.
+
+Start the frontend in another terminal with `npm run dev`. Vite forwards `/api`
+requests to the backend, including when the frontend is shared with `--host`.
+Use the frontend URL printed by Vite; its port may change if 5173 is occupied.
+Press **Ctrl+C** in that terminal to stop the frontend separately.
+
+Check the API directly, then through Vite (using its actual port):
+
+```sh
+curl http://127.0.0.1:3001/api/health
+curl http://localhost:5173/api/health
+```
+
+Both return `{"status":"ok"}`. Unknown API paths return a JSON 404. Run
+`npm run check:server` for server-only type checking; `npm run build` also checks
+the server, but only the frontend is written to `dist/` for GitHub Pages.
+
+The API also accepts structured conversations and returns a fixed backend demo
+reply. Try it directly or replace the address with Vite’s URL to use the proxy:
+
+```sh
+curl http://127.0.0.1:3001/api/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"messages":[{"role":"user","content":"What projects has Isaac worked on?"}]}'
+```
+
+Expected response:
+
+```json
+{
+  "reply": {
+    "role": "assistant",
+    "content": "This is a backend demo reply. Gemini is not connected yet."
+  }
+}
+```
+
+Requests contain only `messages`; each message contains only `role` and `content`.
+Roles alternate between `user` and `assistant`, starting and ending with `user`.
+Content must be nonblank. User messages have a 2,000-character limit; the request
+allows 21 messages, 20,000 total content characters, and a 128 KiB UTF-8 JSON body.
+Character limits use JavaScript string length, matching the UI’s input limit.
+
+Errors use `{"error":{"code":"INVALID_REQUEST","message":"..."}}`, with HTTP
+400 for invalid input, 413 for exceeded limits, 415 for unsupported media, 405
+for an unsupported chat method, 404 for unknown routes, and 500 for internal
+failures. The API does not retain conversation history or log message content.
+
+`server/index.ts` owns startup and shutdown. The Express app routes a request
+through validation, an asynchronous reply generator, and a typed JSON response.
+Tests inject generators without starting the normal server; they use temporary
+ports and close their listeners afterward. Run them with `npm run test:server`.
+The shared transport types and limits live in `shared/chat.ts`; browser entry
+IDs and UI state stay inside the chat feature.
+
+The panel still uses its browser demo. Curated portfolio context and Gemini are
+milestone 3; connecting the panel to this API is milestone 4. No API key is needed
+yet, and GitHub Pages continues to publish only the static frontend.
 
 ## Updating the site
 
@@ -62,6 +133,8 @@ followed by the frontend connection. Retrieval and public hosting come later.
 | --- | --- |
 | `src/data/portfolio.ts` | Profile, education, experience, project stories, contribution details and links |
 | `src/components/` | Reusable interface components |
+| `server/` | Local conversation API, validation, reply generation and tests |
+| `shared/chat.ts` | Shared conversation types and limits |
 | `src/index.css` | Global styles, theme tokens and typography |
 | `src/App.css` | Page layout and responsive styling |
 | `public/projects/` | Project screenshots and other local project assets |
@@ -87,7 +160,8 @@ versions when relevant.
 ## GitHub Pages
 
 [The deployment workflow](.github/workflows/deploy.yml) installs locked
-dependencies, lints and builds pull requests and updates to `main`. Only successful
+dependencies, lints, tests the API and builds pull requests and updates to `main`.
+Only successful
 `main` builds are uploaded and deployed to the `github-pages` environment. The
 workflow can also be run manually with `main` selected.
 
