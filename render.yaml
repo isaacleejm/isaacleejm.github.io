@@ -1,0 +1,26 @@
+# Create through Render's Blueprint flow; see docs/render-deployment.md.
+services:
+  - type: web
+    name: isaac-portfolio-api
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    autoDeployTrigger: "off"
+    buildCommand: npm ci --include=dev && npm run build:server
+    startCommand: npm run start:server
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: CHAT_ALLOWED_ORIGINS
+        value: https://isaacleejm.github.io
+      # Verify real client isolation and spoof resistance before enabling Pages chat.
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: GEMINI_API_KEY
+        sync: false

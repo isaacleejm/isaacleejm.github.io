@@ -11,7 +11,7 @@ permissions: {}
 
 jobs:
   build:
-    name: Lint and build
+    name: Lint, test and build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -34,8 +34,19 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test local API
+        run: npm run test:server
+
+      - name: Test chat client
+        run: npm run test:chat
+
       - name: Build
+        env:
+          VITE_CHAT_API_URL: ${{ vars.VITE_CHAT_API_URL }}
         run: npm run build
+
+      - name: Build backend
+        run: npm run build:server
 
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
