@@ -142,6 +142,10 @@ describe('chat API client', () => {
     [413, /too large/],
     [500, /could not reply/],
     [404, /could not reply/],
+    [503, /not configured/],
+    [429, /quota limit/],
+    [504, /took too long/],
+    [502, /could not generate/],
   ] as const) {
     it(`shows a safe message for HTTP ${status} without exposing the response body`, async () => {
       mock.method(globalThis, 'fetch', async () =>

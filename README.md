@@ -33,41 +33,34 @@ The build command checks TypeScript and writes the static site to `dist/`.
 
 ## Chatbot development
 
-The `feat/chatbot` branch is adding a portfolio assistant in small learning
-milestones. The chat panel is visible only with
-`npm run dev`. Production builds and `npm run preview` omit the chat widget.
+The `feat/chatbot` branch adds a portfolio assistant in small learning milestones.
+The panel now calls the local API, which sends curated portfolio context and
+recent conversation history to Gemini. It is visible only with `npm run dev`;
+production builds, `npm run preview`, and GitHub Pages omit the widget.
 
-Open **Ask about Isaac** to try a message, loading feedback, and conversation
-history. Messages now reach the local API through Vite's `/api` proxy, and the
-panel displays the backend's fixed demo reply. Start both servers using the
-commands below. Gemini is not connected and no API key is needed.
-The notice’s X hides it completely; use **Details** in the chat header to
-show it again. Its content can be replaced with response
-accuracy guidance when Gemini is connected.
+### Configure the backend yourself
 
-To test on another device on the same network, run `npm run dev -- --host`
-and open the Network URL printed by Vite. Keep the backend running on the same
-computer as Vite; the browser uses the frontend's address for API requests.
-This supports LAN access over plain HTTP as well as localhost.
+Use `server/.env.example` as a reference. If you do not already have a
+`server/.env`, copy the template there yourself. If it already exists, update it
+in your own editor rather than overwriting it. Set `GEMINI_API_KEY` to your own
+[Google AI Studio key](https://aistudio.google.com/apikey).
 
-History lives in React state: closing and reopening preserves it; refreshing
-clears it. Clear chat also cancels a pending browser request and ignores stale
-responses. You can type while waiting, but Send and Enter submission remain
-disabled until the response arrives. Retry resends the failed conversation
-without adding another copy of the user message.
+`GEMINI_MODEL` defaults to `gemini-3.5-flash-lite`; change it server-side if you
+need another supported model. See the [model documentation](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite).
+Never put the key in a `VITE_*` variable, a frontend file, or a commit. Real
+environment files are ignored by Git; example templates remain trackable.
 
-The full transcript stays visible. Each request sends only the newest history
-that fits both API limits, dropping the oldest complete user/assistant pairs as
-needed. The Details notice explains this behavior and that responses are demos.
+Only normal backend startup loads `server/.env`, using Node's built-in
+`loadEnvFile`. Existing process environment variables take precedence. A missing
+file or blank key leaves chat unavailable while `/api/health` still works. Other
+file-loading errors stop startup with a sanitized configuration message. Changes
+to the environment file require restarting the API.
 
-The UI code lives
-in `src/features/chat/`: the widget renders the interface, `useChat` manages the
-conversation, and `chatClient` sends requests, bounds outgoing history, validates
-replies, and handles errors and a 30-second timeout. The next milestone adds
-curated portfolio context and Gemini with a server-side API key. Retrieval and
-public backend hosting come later.
+Codex checks use fabricated configuration, mocked provider replies, and temporary
+servers that import the app directly. They do not load real environment files.
+You configure credentials and run live Gemini verification yourself.
 
-### Local API development
+### Run the complete app
 
 Start the backend in one terminal:
 
@@ -75,92 +68,149 @@ Start the backend in one terminal:
 npm run dev:server
 ```
 
-It listens at `http://127.0.0.1:3001`. `tsx` restarts it when an imported source
-file changes. Keep that terminal open; press **Ctrl+C** to stop it.
+It listens at `http://127.0.0.1:3001`. Keep that terminal open; press **Ctrl+C** to
+stop it. In a second terminal, start the frontend:
 
-Start the frontend in another terminal with `npm run dev`. Vite forwards `/api`
-requests to the backend, including when the frontend is shared with `--host`.
-Use the frontend URL printed by Vite; its port may change if 5173 is occupied.
-Press **Ctrl+C** in that terminal to stop the frontend separately.
+```sh
+npm run dev
+```
 
-Check the API directly, then through Vite (using its actual port):
+Open Vite's printed URL and **Ask about Isaac**. Vite forwards `/api` requests to
+the loopback backend. For another device on the same network, use
+`npm run dev -- --host` and open Vite's Network URL on that device. The backend
+stays on the computer running Vite; mobile browsers use the frontend's address.
+Stop the frontend separately with **Ctrl+C**.
+
+The launcher says **Preview**, and **Details** explains that answers may be
+inaccurate and that questions, recent messages, and public portfolio context go
+to Google. Its X hides the notice completely; Details shows it again.
+
+### Architecture and conversation behavior
+
+The widget renders the interface, `useChat` manages conversation state, and
+`chatClient` posts to `/api/chat`, validates replies, and maps errors to friendly
+messages. Express validates the request and invokes an injected reply generator.
+Normal startup supplies Gemini; tests supply fakes. There is no runtime demo
+fallback.
+
+The server selects descriptive fields from the existing public portfolio data:
+profile, skills, education, experience, and all six projects, including motivation,
+technologies, contribution details, and public repository links. It omits media
+metadata. The instructions preserve team attribution and Rescan's MentorME
+Agentic-AI Hackathon in Brisbane and AI-generated implementation disclosure.
+Unknown facts should be acknowledged rather than invented. These instructions
+help ground answers but do not guarantee accuracy.
+The instructions distinguish Isaac, the assistant, and the visitor. A visitor's
+name is unknown unless they introduce themselves in the supplied conversation;
+Isaac's profile name must not be used as the visitor's name. After Clear, or when
+an introduction falls outside the recent history, the assistant should no longer
+claim to know that name.
+
+The context goes into Gemini's `systemInstruction`. Validated conversation
+messages become `contents`, with `assistant` mapped to Gemini's `model` role.
+Each call is stateless: no backend conversation store, embeddings, vector search,
+or LangChain is involved. See the [Google Gen AI SDK documentation](https://googleapis.github.io/js-genai/release_docs/).
+The provider deadline is 20 seconds, output is capped at 1,024 tokens, automatic
+retries and continuation are disabled, and the browser deadline is 30 seconds.
+
+History lives in React state: close/reopen preserves it; refresh clears it.
+Each request sends only the newest history fitting the API limits, removing the
+oldest complete user/assistant pairs while leaving the full visible transcript.
+You can type a draft while waiting; Send and Enter submission stay disabled.
+Retry resends the failed conversation without duplicating the user message.
+Clear cancels the browser request and ignores late responses; it does not promise
+to cancel processing already underway at Google.
+
+### API contract
+
+Check health directly or through Vite, using Vite's actual port:
 
 ```sh
 curl http://127.0.0.1:3001/api/health
 curl http://localhost:5173/api/health
 ```
 
-Both return `{"status":"ok"}`. Unknown API paths return a JSON 404. Run
-`npm run check:server` for server-only type checking; `npm run build` also checks
-the server, but only the frontend is written to `dist/` for GitHub Pages.
-
-The API also accepts structured conversations and returns a fixed backend demo
-reply. Try it directly or replace the address with Vite’s URL to use the proxy:
+Both return `{"status":"ok"}`. Health checks the local process and does not call
+Gemini or verify credentials. Test a conversation directly or replace the address
+with Vite's URL to exercise the proxy:
 
 ```sh
 curl http://127.0.0.1:3001/api/chat \
   -H 'Content-Type: application/json' \
-  -d '{"messages":[{"role":"user","content":"What projects has Isaac worked on?"}]}'
+  -d '{"messages":[{"role":"user","content":"What did Isaac contribute to PyHelper?"}]}'
 ```
 
-Expected response:
+Successful responses use `{"reply":{"role":"assistant","content":"..."}}`;
+content is generated and can vary. Requests contain only `messages`, with only
+`role` and `content` per entry. They alternate user/assistant, starting and ending
+with user. Content must be nonblank. Limits remain 2,000 characters per user
+message, 21 messages, 20,000 total content characters, and 128 KiB UTF-8 JSON.
+Character limits use JavaScript string length, matching the UI.
 
-```json
-{
-  "reply": {
-    "role": "assistant",
-    "content": "This is a backend demo reply. Gemini is not connected yet."
-  }
-}
+Errors use `{"error":{"code":"...","message":"..."}}`:
+
+| HTTP | Code | Meaning |
+| --- | --- | --- |
+| 400 | `INVALID_REQUEST` | Invalid JSON, message shape, or ordering |
+| 413 | `PAYLOAD_TOO_LARGE` | Body or conversation limit exceeded |
+| 415 | `UNSUPPORTED_MEDIA_TYPE` | Unsupported content type or encoding |
+| 405 | `METHOD_NOT_ALLOWED` | Use POST for chat |
+| 404 | `NOT_FOUND` | Unknown API route |
+| 503 | `CHAT_UNAVAILABLE` | Missing or blank server-side key |
+| 429 | `RATE_LIMITED` | Gemini request or quota limit reached |
+| 504 | `UPSTREAM_TIMEOUT` | Provider deadline or upstream timeout |
+| 502 | `UPSTREAM_ERROR` | Provider failure, blocked/empty reply, or invalid credentials/model |
+| 500 | `INTERNAL_ERROR` | Unexpected local failure |
+
+The server does not log message contents, keys, or raw provider failures. The
+client displays safe messages rather than raw error response bodies. Browser
+entry IDs stay local and are never sent to the API.
+
+### Verification
+
+Automated checks need no credentials:
+
+```sh
+npm run test:server
+npm run test:chat
+npm run lint
+npm run build
 ```
 
-Requests contain only `messages`; each message contains only `role` and `content`.
-Roles alternate between `user` and `assistant`, starting and ending with `user`.
-Content must be nonblank. User messages have a 2,000-character limit; the request
-allows 21 messages, 20,000 total content characters, and a 128 KiB UTF-8 JSON body.
-Character limits use JavaScript string length, matching the UI’s input limit.
+Server tests cover context, attribution, configuration, role mapping, provider
+errors, deadlines, and the SDK using fabricated HTTP responses. Client tests cover
+bounded history, response validation, cancellation, and UI error messages.
+`npm run check:server` checks backend TypeScript; the normal build also checks it,
+but only the frontend is written to `dist/`.
 
-Errors use `{"error":{"code":"INVALID_REQUEST","message":"..."}}`, with HTTP
-400 for invalid input, 413 for exceeded limits, 415 for unsupported media, 405
-for an unsupported chat method, 404 for unknown routes, and 500 for internal
-failures. The API does not retain conversation history or log message content.
+Live Gemini verification is **pending until you run it with your own key**:
 
-`server/index.ts` owns startup and shutdown. The Express app routes a request
-through validation, an asynchronous reply generator, and a typed JSON response.
-Tests inject generators without starting the normal server; they use temporary
-ports and close their listeners afterward. Run them with `npm run test:server`.
-The shared transport types and limits live in `shared/chat.ts`; browser entry
-IDs and UI state stay inside the chat feature.
+1. Start both servers and open the panel. In browser developer tools, verify a
+   `POST /api/chat` returns HTTP 200 and a generated answer appears.
+2. Ask about Telly-Space's motivation and technology, then follow up about Isaac's
+   contribution. Check that the answer stays within the documented implemented
+   features and understands the recent conversation.
+3. Ask what Isaac contributed to PyHelper. Check that it distinguishes his S3,
+   SQS, authentication, and integration work from ownership of the entire app.
+4. Ask whether Isaac hand-wrote Rescan. Check that the answer names the MentorME
+   Agentic-AI Hackathon in Brisbane and its AI-generated implementation.
+5. Ask for an unknown fact, such as an award not listed in the portfolio. It
+   should acknowledge missing information. Also try asking it to fabricate a
+   contribution and check that it does not comply.
+6. Clear the chat and ask "What is my name?" It should say it does not know.
+   Say "My name is Sam", then ask again; it may use that self-reported name.
+   Clear and ask again; Sam must not carry over. "What is Isaac's full name?"
+   should still return Isaac Jo Min Lee, while "What is your name?" should
+   identify the portfolio assistant rather than Isaac.
+7. Stop the API, send a question, and inspect the error. Restart it and Retry;
+   the user message should appear only once. Check that typing while waiting,
+   Clear during loading, Details/X, and close/reopen still work.
+8. Inspect a narrow mobile viewport, then test actual Safari using an iPhone on
+   the same network and Vite's Network URL.
 
-### Verify the browser connection
-
-1. Start the API and frontend in separate terminals as described above.
-2. Open the frontend URL and **Ask about Isaac**. Open browser developer tools
-   and select **Network**.
-3. Send a message. Verify a `POST /api/chat` request returns HTTP 200 and the UI
-   displays: “This is a backend demo reply. Gemini is not connected yet.”
-4. Send a follow-up. Its request should include the previous user message and
-   assistant reply, followed by the new question; no UI message IDs are sent.
-5. Stop the API with **Ctrl+C**, then send another message. Expect an error with
-   **Retry message**. Restart the API and retry; the failed user message should
-   appear only once and the reply should arrive.
-6. In developer tools, use network throttling to inspect loading behavior. Type
-   a new draft while a request is pending and confirm Send/Enter cannot submit
-   it yet. The draft should remain after the reply. Clear a pending request and
-   verify its eventual response does not restore the old conversation.
-7. Check a narrow mobile viewport, Details/X, and close/reopen behavior. For an
-   actual Safari check, open Vite's Network URL on an iPhone on the same network.
-
-Client requests show friendly errors for unreachable servers, non-success HTTP
-responses, invalid replies, and timeouts; raw server error bodies are not shown.
-Run `npm run test:chat` for mocked client tests, including history boundaries and
-cancellation. Backend tests and client tests do not need environment files or
-credentials. Real environment files are ignored by Git; `.env.example` templates
-remain trackable. The current backend does not load environment files.
-
-Milestone 3 verifies the UI-to-API connection. Milestone 4 adds curated portfolio
-context and Gemini, then repeats the browser checks with real generated replies.
-GitHub Pages continues to publish only the static frontend, without the widget.
+Milestone 4 adds Gemini and curated context to the connected UI. Public backend
+hosting, persistence, streaming, and future AWS RAG infrastructure remain later
+milestones.
 
 ## Updating the site
 

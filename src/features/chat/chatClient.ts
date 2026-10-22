@@ -35,6 +35,26 @@ function recentMessages(history: readonly ChatMessage[]): ChatMessage[] {
 }
 
 function httpError(status: number): ChatRequestError {
+  if (status === 503) {
+    return new ChatRequestError(
+      'The assistant is not configured yet. Please try again later.',
+    )
+  }
+  if (status === 429) {
+    return new ChatRequestError(
+      'The assistant has reached its request or quota limit. Please try again later.',
+    )
+  }
+  if (status === 504) {
+    return new ChatRequestError(
+      'The assistant took too long to reply. Retry your message.',
+    )
+  }
+  if (status === 502) {
+    return new ChatRequestError(
+      'The assistant could not generate a reply. Retry your message.',
+    )
+  }
   if (status === 413) {
     return new ChatRequestError(
       'This conversation is too large. Clear the chat and try again.',

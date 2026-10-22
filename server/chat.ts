@@ -11,9 +11,6 @@ export type ReplyGenerator = (
   messages: readonly ChatMessage[],
 ) => Promise<string>
 
-export const generateDemoReply: ReplyGenerator = async () =>
-  'This is a backend demo reply. Gemini is not connected yet.'
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }

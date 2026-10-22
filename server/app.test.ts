@@ -3,6 +3,8 @@ import { once } from 'node:events'
 import { after, before, describe, it } from 'node:test'
 import { createApp } from './app.ts'
 import type { ReplyGenerator } from './chat.ts'
+import { ApiError } from './errors.ts'
+import { createGeminiReplyGenerator } from './gemini.ts'
 import type {
   ChatErrorCode,
   ChatErrorResponse,
@@ -11,7 +13,9 @@ import type {
   ChatResponse,
 } from '../shared/chat.ts'
 
-async function startApp(generateReply?: ReplyGenerator) {
+async function startApp(
+  generateReply: ReplyGenerator = async () => 'A test reply.',
+) {
   const server = createApp(generateReply).listen(0, '127.0.0.1')
   await once(server, 'listening')
   const address = server.address()
@@ -69,13 +73,51 @@ describe('local conversation API', () => {
     assert.deepEqual(await response.json(), { status: 'ok' })
   })
 
-  it('returns an explicitly labelled backend demo reply', async () => {
+  it('keeps health available and validates requests when Gemini is unconfigured', async () => {
+    const unconfiguredApi = await startApp(
+      createGeminiReplyGenerator(undefined),
+    )
+    try {
+      const health = await fetch(`${unconfiguredApi.url}/api/health`)
+      assert.deepEqual(await health.json(), { status: 'ok' })
+      await assertError(
+        await post(unconfiguredApi.url, {}),
+        400,
+        'INVALID_REQUEST',
+      )
+      await assertError(
+        await post(unconfiguredApi.url, singleTurn),
+        503,
+        'CHAT_UNAVAILABLE',
+      )
+    } finally {
+      await unconfiguredApi.close()
+    }
+  })
+
+  for (const [status, code] of [
+    [429, 'RATE_LIMITED'],
+    [504, 'UPSTREAM_TIMEOUT'],
+    [502, 'UPSTREAM_ERROR'],
+  ] as const) {
+    it(`preserves the shared ${code} error response`, async () => {
+      const failingApi = await startApp(async () => {
+        throw new ApiError(status, code, 'A safe error message.')
+      })
+      try {
+        await assertError(await post(failingApi.url, singleTurn), status, code)
+      } finally {
+        await failingApi.close()
+      }
+    })
+  }
+
+  it('returns the injected reply in the shared response format', async () => {
     const response = await post(api.url, singleTurn)
     assert.equal(response.status, 200)
     const body = (await response.json()) as ChatResponse
     assert.equal(body.reply.role, 'assistant')
-    assert.match(body.reply.content, /backend demo reply/)
-    assert.match(body.reply.content, /Gemini is not connected/)
+    assert.equal(body.reply.content, 'A test reply.')
   })
 
   it('passes validated multi-turn history to the generator and keeps requests independent', async () => {

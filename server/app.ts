@@ -1,14 +1,10 @@
 import express from 'express'
 import { ApiError, handleApiError } from './errors.ts'
-import {
-  generateDemoReply,
-  parseChatRequest,
-  type ReplyGenerator,
-} from './chat.ts'
+import { parseChatRequest, type ReplyGenerator } from './chat.ts'
 import type { ChatResponse } from '../shared/chat.ts'
 
 // Creating the app does not open a port, so tests can manage their own server.
-export function createApp(generateReply: ReplyGenerator = generateDemoReply) {
+export function createApp(generateReply: ReplyGenerator) {
   const app = express()
 
   app.get('/api/health', (_request, response) => {

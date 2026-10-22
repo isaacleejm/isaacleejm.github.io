@@ -21,6 +21,10 @@ export type ChatErrorCode =
   | 'METHOD_NOT_ALLOWED'
   | 'NOT_FOUND'
   | 'INTERNAL_ERROR'
+  | 'CHAT_UNAVAILABLE'
+  | 'RATE_LIMITED'
+  | 'UPSTREAM_TIMEOUT'
+  | 'UPSTREAM_ERROR'
 
 export interface ChatErrorResponse {
   error: {
