@@ -41,6 +41,8 @@ jobs:
         run: npm run test:chat
 
       - name: Build
+        env:
+          VITE_CHAT_API_URL: ${{ vars.VITE_CHAT_API_URL }}
         run: npm run build
 
       - name: Build backend

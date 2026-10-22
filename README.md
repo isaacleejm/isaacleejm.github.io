@@ -189,7 +189,7 @@ configuration, CORS/preflight, rate-limit boundaries and resets, and proxy trust
 `npm run check:server` checks backend TypeScript; the normal build also checks it,
 but only the frontend is written to `dist/`.
 
-Live Gemini verification is **pending until you run it with your own key**:
+Run live Gemini verification yourself with your own key:
 
 1. Start both servers and open the panel. In browser developer tools, verify a
    `POST /api/chat` returns HTTP 200 and a generated answer appears.
@@ -217,9 +217,9 @@ Live Gemini verification is **pending until you run it with your own key**:
 ### Hosting preparation (milestone 5)
 
 This milestone prepares a single-process Node backend and an optional public
-frontend endpoint. No cloud resources or public deployment have been created.
-GitHub Pages continues to serve only the static frontend; the API needs a
-separate managed backend or serverless host, selected in the next milestone.
+frontend endpoint. GitHub Pages serves the static frontend; the API runs on a
+separate host. Milestone 6 adds Render configuration and a deployment guide;
+adding those files does not create cloud resources or publish the API.
 
 Build and start the backend independently of Vite:
 
@@ -290,19 +290,35 @@ Retry remains manual. Limits use memory, reset on restart, do not coordinate
 across multiple instances, and are not a hard billing cap. A distributed store
 and hosting-specific protections are deferred.
 
-Proxy trust stays zero until the actual host is selected and its topology is
-verified. Blindly trusting forwarded headers can let clients bypass IP limits;
+Local proxy trust defaults to zero. The Render Blueprint starts with one trusted
+hop as a candidate to verify before enabling the public widget. Blindly trusting
+forwarded headers can let clients bypass IP limits;
 not trusting a real proxy can group all visitors under the proxy IP. The global
 counter is independent of the IP key. See the [proxy guidance](https://express-rate-limit.mintlify.app/guides/troubleshooting-proxy-issues),
 [CORS documentation](https://expressjs.com/en/resources/middleware/cors/), and
 [rate-limit store limitations](https://express-rate-limit.mintlify.app/overview).
 
-Before publishing in the next milestone, choose the backend host, inject its
-production configuration and secret, verify HTTPS/origins/proxy behavior, then
-set the frontend endpoint in its build environment and deploy the opt-in widget.
-CI now builds both artifacts but still uploads only `dist/` to GitHub Pages.
-Persistence, streaming, authentication, and future AWS RAG infrastructure remain
-later milestones.
+CI builds both artifacts but uploads only `dist/` to GitHub Pages. Persistence,
+streaming, authentication, and future AWS RAG infrastructure remain later
+milestones.
+
+### Render deployment (milestone 6)
+
+The root [Render Blueprint](render.yaml) defines a free Node web service in
+Singapore, built from `main` with the existing Node version in `.nvmrc`. Render
+installs build dependencies, compiles the backend, and starts the emitted
+JavaScript. Its injected `PORT` is used automatically. Backend deployments are
+manual; the initial Blueprint creation still builds and deploys the service.
+
+Follow the [Render deployment guide](docs/render-deployment.md) to create the
+service, enter your Gemini key directly in Render, verify HTTPS/CORS and proxy
+rate limits, then enable the widget. Keep the GitHub repository Actions variable
+`VITE_CHAT_API_URL` unset until those checks pass. Set it to the actual Render
+HTTPS URL ending in `/api/chat`, then run the Pages workflow on `main`.
+
+The free service sleeps after 15 idle minutes and may take about a minute to
+wake. A first-request timeout and manual Retry are accepted for this initial
+deployment. The guide covers cold-start testing, logs, usage, and rollback.
 
 ## Updating the site
 
@@ -342,6 +358,12 @@ and backend for pull requests and updates to `main`.
 Only successful
 `main` builds are uploaded and deployed to the `github-pages` environment. The
 workflow can also be run manually with `main` selected.
+
+The frontend build receives the public endpoint from the repository Actions
+variable `VITE_CHAT_API_URL`. It is a URL, not a secret. When unset or blank, the
+production chatbot stays hidden. Changing this variable requires a new Pages
+build; it does not modify an already published bundle. The Gemini key belongs
+only in the backend host's environment.
 
 In the repository's **Settings → Pages → Build and deployment**, select
 **GitHub Actions** as the source. The workflow publishes `dist/`; generated files
