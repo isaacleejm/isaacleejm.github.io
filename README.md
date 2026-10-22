@@ -29,6 +29,33 @@ npm run preview
 The build command checks TypeScript and writes the static site to `dist/`.
 `preview` serves that build locally; GitHub Pages hosts the published site.
 
+## Chatbot development
+
+The `feat/chatbot` branch is adding a portfolio assistant in small learning
+milestones. The first milestone is a local UI demo, visible only with
+`npm run dev`. Production builds and `npm run preview` omit the chat widget.
+
+Open **Ask about Isaac** to try a message, loading feedback, and conversation
+history. **Try a demo error** fills `/error` into the input; sending it simulates
+a persistent failure so you can try Retry or Clear chat. Retrying `/error`
+deliberately fails again; Clear chat lets you start a fresh conversation.
+Replies are fixed demo text. No messages leave the browser and no API key is
+needed for this milestone.
+The notice’s X hides it completely; use **Details** in the chat header to
+show it again. Its content can be replaced with response
+accuracy guidance when Gemini is connected.
+
+To test on another device on the same network, run `npm run dev -- --host`
+and open the Network URL printed by Vite. The UI demo supports LAN access
+over plain HTTP as well as localhost.
+
+History lives in React state: closing and reopening preserves it; refreshing
+clears it. Clear chat also cancels a pending demo reply. All feature code lives
+in `src/features/chat/`: the widget renders the interface, `useChat` manages the
+conversation, and `chatClient` supplies simulated replies. The next milestones
+will add a local TypeScript backend and Gemini with a server-side API key,
+followed by the frontend connection. Retrieval and public hosting come later.
+
 ## Updating the site
 
 | Location | Purpose |

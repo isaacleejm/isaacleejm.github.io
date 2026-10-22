@@ -1,5 +1,6 @@
 import { Header, Hero, About, Contact, Footer } from './components/Sections'
 import { Projects } from './components/Projects'
+import { ChatWidget } from './features/chat/ChatWidget'
 import './App.css'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Contact />
       </main>
       <Footer />
+      {import.meta.env.DEV && <ChatWidget />}
     </>
   )
 }
