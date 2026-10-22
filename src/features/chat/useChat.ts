@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { requestDemoReply } from './chatClient'
+import { ChatRequestError, requestChatReply } from './chatClient'
 import {
   MAX_MESSAGE_LENGTH,
   type ChatEntry,
@@ -33,7 +33,7 @@ export function useChat() {
     setStatus('loading')
     setError(null)
 
-    void requestDemoReply(
+    void requestChatReply(
       history.map(({ role, content }) => ({ role, content })),
       controller.signal,
     )
@@ -43,11 +43,13 @@ export function useChat() {
         setMessages([...history, createEntry(reply)])
         setStatus('idle')
       })
-      .catch(() => {
+      .catch((failure: unknown) => {
         if (activeRequest.current !== controller) return
 
         setError(
-          'The demo reply failed. Retry your message, or clear the chat to start again.',
+          failure instanceof ChatRequestError
+            ? failure.message
+            : 'The reply failed. Retry your message, or clear the chat to start again.',
         )
         setStatus('error')
       })

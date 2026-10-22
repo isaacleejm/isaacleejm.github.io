@@ -178,22 +178,18 @@ export function ChatWidget() {
 
         <ChatNotice
           id={noticeId}
-          title="Replies are simulated"
+          title="Local API demo"
           isOpen={isNoticeOpen}
           onDismiss={() => {
             setIsNoticeOpen(false)
             noticeToggleRef.current?.focus()
           }}
         >
-          <p>Gemini isn’t connected yet, and messages stay in this browser.</p>
-          <button
-            className="chat-demo-error"
-            type="button"
-            disabled={status !== 'idle'}
-            onClick={() => choosePrompt('/error')}
-          >
-            Try a demo error
-          </button>
+          <p>
+            Messages go to the local backend, which returns fixed demo replies.
+            Gemini isn’t connected yet. Only recent conversation history is
+            sent; the full chat stays visible until you clear it or refresh.
+          </p>
         </ChatNotice>
 
         <div
@@ -213,8 +209,8 @@ export function ChatWidget() {
               <h3>A conversation about my work.</h3>
               <p>
                 This panel will help you explore my projects, skills, and
-                contributions. For now, try the chat controls with a demo
-                message.
+                contributions. For now, send a message to try the local API
+                connection.
               </p>
               <div className="chat-prompts" aria-label="Example questions">
                 <button
@@ -257,7 +253,7 @@ export function ChatWidget() {
                 <span />
                 <span />
               </span>
-              Preparing demo reply…
+              Waiting for reply…
             </p>
           )}
           {error && (

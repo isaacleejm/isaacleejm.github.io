@@ -37,6 +37,9 @@ jobs:
       - name: Test local API
         run: npm run test:server
 
+      - name: Test chat client
+        run: npm run test:chat
+
       - name: Build
         run: npm run build
 

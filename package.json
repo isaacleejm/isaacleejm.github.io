@@ -8,6 +8,7 @@
     "dev:server": "tsx watch --clear-screen=false --tsconfig tsconfig.server.json server/index.ts",
     "check:server": "tsc -p tsconfig.server.json",
     "test:server": "node --import tsx --test server/app.test.ts",
+    "test:chat": "node --import tsx --test tests/chatClient.test.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

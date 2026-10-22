@@ -23,6 +23,7 @@ Before publishing, run the checks and inspect the production build:
 ```sh
 npm run lint
 npm run test:server
+npm run test:chat
 npm run build
 npm run preview
 ```
@@ -33,30 +34,38 @@ The build command checks TypeScript and writes the static site to `dist/`.
 ## Chatbot development
 
 The `feat/chatbot` branch is adding a portfolio assistant in small learning
-milestones. The first milestone is a local UI demo, visible only with
+milestones. The chat panel is visible only with
 `npm run dev`. Production builds and `npm run preview` omit the chat widget.
 
 Open **Ask about Isaac** to try a message, loading feedback, and conversation
-history. **Try a demo error** fills `/error` into the input; sending it simulates
-a persistent failure so you can try Retry or Clear chat. Retrying `/error`
-deliberately fails again; Clear chat lets you start a fresh conversation.
-Replies are fixed demo text. No messages leave the browser and no API key is
-needed for this milestone.
+history. Messages now reach the local API through Vite's `/api` proxy, and the
+panel displays the backend's fixed demo reply. Start both servers using the
+commands below. Gemini is not connected and no API key is needed.
 The notice’s X hides it completely; use **Details** in the chat header to
 show it again. Its content can be replaced with response
 accuracy guidance when Gemini is connected.
 
 To test on another device on the same network, run `npm run dev -- --host`
-and open the Network URL printed by Vite. The UI demo supports LAN access
-over plain HTTP as well as localhost.
+and open the Network URL printed by Vite. Keep the backend running on the same
+computer as Vite; the browser uses the frontend's address for API requests.
+This supports LAN access over plain HTTP as well as localhost.
 
 History lives in React state: closing and reopening preserves it; refreshing
-clears it. Clear chat also cancels a pending demo reply. The UI code lives
+clears it. Clear chat also cancels a pending browser request and ignores stale
+responses. You can type while waiting, but Send and Enter submission remain
+disabled until the response arrives. Retry resends the failed conversation
+without adding another copy of the user message.
+
+The full transcript stays visible. Each request sends only the newest history
+that fits both API limits, dropping the oldest complete user/assistant pairs as
+needed. The Details notice explains this behavior and that responses are demos.
+
+The UI code lives
 in `src/features/chat/`: the widget renders the interface, `useChat` manages the
-conversation, and `chatClient` supplies simulated replies. A separate local
-TypeScript backend is available below. The next milestones add Gemini with a
-server-side API key, followed by the frontend connection. Retrieval and public
-hosting come later.
+conversation, and `chatClient` sends requests, bounds outgoing history, validates
+replies, and handles errors and a 30-second timeout. The next milestone adds
+curated portfolio context and Gemini with a server-side API key. Retrieval and
+public backend hosting come later.
 
 ### Local API development
 
@@ -123,9 +132,35 @@ ports and close their listeners afterward. Run them with `npm run test:server`.
 The shared transport types and limits live in `shared/chat.ts`; browser entry
 IDs and UI state stay inside the chat feature.
 
-The panel still uses its browser demo. Curated portfolio context and Gemini are
-milestone 3; connecting the panel to this API is milestone 4. No API key is needed
-yet, and GitHub Pages continues to publish only the static frontend.
+### Verify the browser connection
+
+1. Start the API and frontend in separate terminals as described above.
+2. Open the frontend URL and **Ask about Isaac**. Open browser developer tools
+   and select **Network**.
+3. Send a message. Verify a `POST /api/chat` request returns HTTP 200 and the UI
+   displays: “This is a backend demo reply. Gemini is not connected yet.”
+4. Send a follow-up. Its request should include the previous user message and
+   assistant reply, followed by the new question; no UI message IDs are sent.
+5. Stop the API with **Ctrl+C**, then send another message. Expect an error with
+   **Retry message**. Restart the API and retry; the failed user message should
+   appear only once and the reply should arrive.
+6. In developer tools, use network throttling to inspect loading behavior. Type
+   a new draft while a request is pending and confirm Send/Enter cannot submit
+   it yet. The draft should remain after the reply. Clear a pending request and
+   verify its eventual response does not restore the old conversation.
+7. Check a narrow mobile viewport, Details/X, and close/reopen behavior. For an
+   actual Safari check, open Vite's Network URL on an iPhone on the same network.
+
+Client requests show friendly errors for unreachable servers, non-success HTTP
+responses, invalid replies, and timeouts; raw server error bodies are not shown.
+Run `npm run test:chat` for mocked client tests, including history boundaries and
+cancellation. Backend tests and client tests do not need environment files or
+credentials. Real environment files are ignored by Git; `.env.example` templates
+remain trackable. The current backend does not load environment files.
+
+Milestone 3 verifies the UI-to-API connection. Milestone 4 adds curated portfolio
+context and Gemini, then repeats the browser checks with real generated replies.
+GitHub Pages continues to publish only the static frontend, without the widget.
 
 ## Updating the site
 
@@ -160,7 +195,7 @@ versions when relevant.
 ## GitHub Pages
 
 [The deployment workflow](.github/workflows/deploy.yml) installs locked
-dependencies, lints, tests the API and builds pull requests and updates to `main`.
+dependencies, lints, tests the API and chat client, and builds pull requests and updates to `main`.
 Only successful
 `main` builds are uploaded and deployed to the `github-pages` environment. The
 workflow can also be run manually with `main` selected.
