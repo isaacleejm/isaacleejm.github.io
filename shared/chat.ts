@@ -25,6 +25,7 @@ export type ChatErrorCode =
   | 'RATE_LIMITED'
   | 'UPSTREAM_TIMEOUT'
   | 'UPSTREAM_ERROR'
+  | 'ORIGIN_NOT_ALLOWED'
 
 export interface ChatErrorResponse {
   error: {

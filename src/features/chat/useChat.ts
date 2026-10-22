@@ -7,7 +7,7 @@ import {
   type ChatStatus,
 } from './types'
 
-export function useChat() {
+export function useChat(apiUrl: string) {
   const [messages, setMessages] = useState<ChatEntry[]>([])
   const [status, setStatus] = useState<ChatStatus>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -36,6 +36,7 @@ export function useChat() {
     void requestChatReply(
       history.map(({ role, content }) => ({ role, content })),
       controller.signal,
+      apiUrl,
     )
       .then((reply) => {
         if (activeRequest.current !== controller) return

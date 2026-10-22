@@ -35,6 +35,11 @@ function recentMessages(history: readonly ChatMessage[]): ChatMessage[] {
 }
 
 function httpError(status: number): ChatRequestError {
+  if (status === 403) {
+    return new ChatRequestError(
+      'Chat is not available from this website. Please try again later.',
+    )
+  }
   if (status === 503) {
     return new ChatRequestError(
       'The assistant is not configured yet. Please try again later.',
@@ -77,6 +82,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export async function requestChatReply(
   history: readonly ChatMessage[],
   signal: AbortSignal,
+  apiUrl = '/api/chat',
 ): Promise<ChatMessage> {
   if (signal.aborted) throw new DOMException('Request cancelled', 'AbortError')
 
@@ -91,7 +97,7 @@ export async function requestChatReply(
 
   try {
     const body: ChatRequest = { messages: recentMessages(history) }
-    const response = await fetch('/api/chat', {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),

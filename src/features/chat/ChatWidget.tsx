@@ -30,7 +30,7 @@ function ChatIcon() {
   )
 }
 
-export function ChatWidget() {
+export function ChatWidget({ apiUrl }: { apiUrl: string }) {
   const [isOpen, setIsOpen] = useState(false)
   const [isNoticeOpen, setIsNoticeOpen] = useState(true)
   const [draft, setDraft] = useState('')
@@ -40,7 +40,8 @@ export function ChatWidget() {
   const transcriptRef = useRef<HTMLDivElement>(null)
   const noticeToggleRef = useRef<HTMLButtonElement>(null)
   const noticeId = useId()
-  const { messages, status, error, sendMessage, retry, clearChat } = useChat()
+  const { messages, status, error, sendMessage, retry, clearChat } =
+    useChat(apiUrl)
   const canSend = status === 'idle' && draft.trim().length > 0
 
   useEffect(() => {

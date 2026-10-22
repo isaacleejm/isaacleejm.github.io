@@ -60,6 +60,19 @@ describe('chat API client', () => {
     assert.equal(history[0].id, 'local-key')
   })
 
+  it('uses the configured endpoint when supplied', async () => {
+    const fetchMock = mockSuccess()
+    await requestChatReply(
+      [question],
+      new AbortController().signal,
+      'https://api.example.com/api/chat',
+    )
+    assert.equal(
+      fetchMock.mock.calls[0].arguments[0],
+      'https://api.example.com/api/chat',
+    )
+  })
+
   it('keeps exactly 21 messages and removes only the oldest complete turns beyond that', async () => {
     const history: ChatMessage[] = Array.from({ length: 23 }, (_, index) => ({
       role: index % 2 === 0 ? 'user' : 'assistant',
@@ -139,6 +152,7 @@ describe('chat API client', () => {
 
   for (const [status, message] of [
     [400, /could not accept/],
+    [403, /not available from this website/],
     [413, /too large/],
     [500, /could not reply/],
     [404, /could not reply/],

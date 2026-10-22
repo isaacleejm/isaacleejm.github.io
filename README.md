@@ -25,6 +25,7 @@ npm run lint
 npm run test:server
 npm run test:chat
 npm run build
+npm run build:server
 npm run preview
 ```
 
@@ -35,8 +36,9 @@ The build command checks TypeScript and writes the static site to `dist/`.
 
 The `feat/chatbot` branch adds a portfolio assistant in small learning milestones.
 The panel now calls the local API, which sends curated portfolio context and
-recent conversation history to Gemini. It is visible only with `npm run dev`;
-production builds, `npm run preview`, and GitHub Pages omit the widget.
+recent conversation history to Gemini. Development uses Vite's local proxy.
+Production builds show the widget only when `VITE_CHAT_API_URL` is configured;
+leaving it blank keeps the published portfolio unchanged.
 
 ### Configure the backend yourself
 
@@ -50,8 +52,9 @@ need another supported model. See the [model documentation](https://ai.google.de
 Never put the key in a `VITE_*` variable, a frontend file, or a commit. Real
 environment files are ignored by Git; example templates remain trackable.
 
-Only normal backend startup loads `server/.env`, using Node's built-in
-`loadEnvFile`. Existing process environment variables take precedence. A missing
+Development backend startup loads `server/.env`, using Node's built-in
+`loadEnvFile`. With `NODE_ENV=production`, startup never reads that file and
+uses injected process variables instead. Existing process environment variables take precedence. A missing
 file or blank key leaves chat unavailable while `/api/health` still works. Other
 file-loading errors stop startup with a sanitized configuration message. Changes
 to the environment file require restarting the API.
@@ -88,7 +91,7 @@ to Google. Its X hides the notice completely; Details shows it again.
 ### Architecture and conversation behavior
 
 The widget renders the interface, `useChat` manages conversation state, and
-`chatClient` posts to `/api/chat`, validates replies, and maps errors to friendly
+`chatClient` posts to the configured endpoint, validates replies, and maps errors to friendly
 messages. Express validates the request and invokes an injected reply generator.
 Normal startup supplies Gemini; tests supply fakes. There is no runtime demo
 fallback.
@@ -152,12 +155,13 @@ Errors use `{"error":{"code":"...","message":"..."}}`:
 | HTTP | Code | Meaning |
 | --- | --- | --- |
 | 400 | `INVALID_REQUEST` | Invalid JSON, message shape, or ordering |
+| 403 | `ORIGIN_NOT_ALLOWED` | Origin is not in the configured allowlist |
 | 413 | `PAYLOAD_TOO_LARGE` | Body or conversation limit exceeded |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` | Unsupported content type or encoding |
 | 405 | `METHOD_NOT_ALLOWED` | Use POST for chat |
 | 404 | `NOT_FOUND` | Unknown API route |
 | 503 | `CHAT_UNAVAILABLE` | Missing or blank server-side key |
-| 429 | `RATE_LIMITED` | Gemini request or quota limit reached |
+| 429 | `RATE_LIMITED` | Local request limit or Gemini quota reached |
 | 504 | `UPSTREAM_TIMEOUT` | Provider deadline or upstream timeout |
 | 502 | `UPSTREAM_ERROR` | Provider failure, blocked/empty reply, or invalid credentials/model |
 | 500 | `INTERNAL_ERROR` | Unexpected local failure |
@@ -175,11 +179,13 @@ npm run test:server
 npm run test:chat
 npm run lint
 npm run build
+npm run build:server
 ```
 
 Server tests cover context, attribution, configuration, role mapping, provider
 errors, deadlines, and the SDK using fabricated HTTP responses. Client tests cover
-bounded history, response validation, cancellation, and UI error messages.
+bounded history, response validation, cancellation, endpoint selection, and UI error messages. Hosting tests cover
+configuration, CORS/preflight, rate-limit boundaries and resets, and proxy trust.
 `npm run check:server` checks backend TypeScript; the normal build also checks it,
 but only the frontend is written to `dist/`.
 
@@ -208,9 +214,95 @@ Live Gemini verification is **pending until you run it with your own key**:
 8. Inspect a narrow mobile viewport, then test actual Safari using an iPhone on
    the same network and Vite's Network URL.
 
-Milestone 4 adds Gemini and curated context to the connected UI. Public backend
-hosting, persistence, streaming, and future AWS RAG infrastructure remain later
-milestones.
+### Hosting preparation (milestone 5)
+
+This milestone prepares a single-process Node backend and an optional public
+frontend endpoint. No cloud resources or public deployment have been created.
+GitHub Pages continues to serve only the static frontend; the API needs a
+separate managed backend or serverless host, selected in the next milestone.
+
+Build and start the backend independently of Vite:
+
+```sh
+npm run build:server
+NODE_ENV=production HOST=127.0.0.1 PORT=3002 CHAT_ALLOWED_ORIGINS=http://127.0.0.1:4173 npm run start:server
+```
+
+This local production smoke command needs no key: health works, while chat
+returns `503 CHAT_UNAVAILABLE` unless a key is separately injected into the
+process. It intentionally does not read your development key file. `start:server`
+runs `node dist-server/server/index.js` without `tsx`. `dist-server/` contains
+compiled backend/shared code and portfolio data, excludes tests and environment
+files, is ignored by Git, and is separate from Vite's `dist/`. Rebuild it after
+backend or portfolio changes; the compiled server does not watch source files.
+
+For local production frontend verification, use another terminal:
+
+```sh
+VITE_CHAT_API_URL=http://127.0.0.1:3002/api/chat npm run build
+npm run preview -- --host 127.0.0.1 --port 4173 --strictPort
+```
+
+Open exactly `http://127.0.0.1:4173` so it matches the allowed origin above. The
+widget appears and reaches the separate API; without an injected key, expect
+the friendly configuration error. Stop each process with **Ctrl+C**. To restore
+the usual production artifact with the widget hidden, build with the variable
+blank: `VITE_CHAT_API_URL= npm run build`.
+
+`VITE_CHAT_API_URL` is public and fixed at build time. It is the complete endpoint,
+not a base URL: for example `https://api.example.com/api/chat`. Changing it requires
+rebuilding the frontend. Both development and production honor it; development
+falls back to `/api/chat` when it is blank. Hosted endpoints require HTTPS; HTTP
+is accepted only on `localhost`, `127.0.0.1`, and `[::1]` for local verification.
+Credentials, query strings and fragments are rejected, and invalid configuration
+stops the Vite build/start. Never include an API key. The root `.env.example`
+documents this public setting; do not overwrite an existing environment file.
+
+Backend configuration is parsed separately from loading secrets:
+
+| Variable | Default / behavior |
+| --- | --- |
+| `NODE_ENV` | `development`; use `production` on a host. `test` is also accepted. |
+| `HOST` | `127.0.0.1` locally, `0.0.0.0` in production; may be overridden. |
+| `PORT` | `3001`; accepts integers from 1 through 65535. Honor the host's injected port. |
+| `CHAT_ALLOWED_ORIGINS` | Empty in development; required in production. Comma-separated exact HTTP(S) origins, without paths, wildcards, or trailing slashes. |
+| `TRUST_PROXY_HOPS` | `0`; nonnegative integer matching the verified deployment proxy topology. |
+| `GEMINI_API_KEY` | Backend secret only; missing/blank means unavailable chat, not a failed health check. |
+| `GEMINI_MODEL` | `gemini-3.5-flash-lite`. |
+
+For the eventual live portfolio, set `CHAT_ALLOWED_ORIGINS` to
+`https://isaacleejm.github.io`. Add other origins only if intentionally supported.
+With an allowlist, `/api/chat` supports JSON POST preflight, reflects only an
+allowed origin, and does not use cookies. A disallowed Origin receives
+`403 ORIGIN_NOT_ALLOWED` before the provider is called. Browser JavaScript on
+that origin cannot read the response because it has no CORS permission. Requests
+without Origin are allowed for command-line clients, so CORS is not authentication.
+Development without an allowlist adds no cross-origin permissions, preserving
+the same-origin Vite proxy and LAN HTTP behavior. An explicit development
+allowlist can be used to test cross-origin access.
+
+Production limits allow 10 POST attempts per IP and 60 admitted attempts across
+the process within 10 minutes. Per-IP rejection happens before the process
+counter. Limits include failed attempts; health and preflight do not count.
+Excess requests return `429 RATE_LIMITED`, `Retry-After`, and standard rate-limit
+headers. Allowed-origin browser clients can read these headers and error bodies.
+Retry remains manual. Limits use memory, reset on restart, do not coordinate
+across multiple instances, and are not a hard billing cap. A distributed store
+and hosting-specific protections are deferred.
+
+Proxy trust stays zero until the actual host is selected and its topology is
+verified. Blindly trusting forwarded headers can let clients bypass IP limits;
+not trusting a real proxy can group all visitors under the proxy IP. The global
+counter is independent of the IP key. See the [proxy guidance](https://express-rate-limit.mintlify.app/guides/troubleshooting-proxy-issues),
+[CORS documentation](https://expressjs.com/en/resources/middleware/cors/), and
+[rate-limit store limitations](https://express-rate-limit.mintlify.app/overview).
+
+Before publishing in the next milestone, choose the backend host, inject its
+production configuration and secret, verify HTTPS/origins/proxy behavior, then
+set the frontend endpoint in its build environment and deploy the opt-in widget.
+CI now builds both artifacts but still uploads only `dist/` to GitHub Pages.
+Persistence, streaming, authentication, and future AWS RAG infrastructure remain
+later milestones.
 
 ## Updating the site
 
@@ -245,7 +337,8 @@ versions when relevant.
 ## GitHub Pages
 
 [The deployment workflow](.github/workflows/deploy.yml) installs locked
-dependencies, lints, tests the API and chat client, and builds pull requests and updates to `main`.
+dependencies, lints, tests the API and chat client, and builds both the frontend
+and backend for pull requests and updates to `main`.
 Only successful
 `main` builds are uploaded and deployed to the `github-pages` environment. The
 workflow can also be run manually with `main` selected.

@@ -2,14 +2,22 @@ import express from 'express'
 import { ApiError, handleApiError } from './errors.ts'
 import { parseChatRequest, type ReplyGenerator } from './chat.ts'
 import type { ChatResponse } from '../shared/chat.ts'
+import { createChatTraffic, type ChatAppOptions } from './traffic.ts'
 
 // Creating the app does not open a port, so tests can manage their own server.
-export function createApp(generateReply: ReplyGenerator) {
+export function createApp(
+  generateReply: ReplyGenerator,
+  options: ChatAppOptions = {},
+) {
   const app = express()
+  app.set('trust proxy', options.trustProxyHops ?? 0)
 
   app.get('/api/health', (_request, response) => {
     response.json({ status: 'ok' })
   })
+
+  const chatTraffic = createChatTraffic(options)
+  if (chatTraffic.length) app.use('/api/chat', ...chatTraffic)
 
   app.post(
     '/api/chat',
@@ -41,7 +49,10 @@ export function createApp(generateReply: ReplyGenerator) {
   )
 
   app.all('/api/chat', (_request, response, next) => {
-    response.set('Allow', 'POST')
+    response.set(
+      'Allow',
+      options.allowedOrigins?.length ? 'POST, OPTIONS' : 'POST',
+    )
     next(new ApiError(405, 'METHOD_NOT_ALLOWED', 'Use POST for this endpoint.'))
   })
 

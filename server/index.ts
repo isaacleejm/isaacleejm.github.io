@@ -1,12 +1,14 @@
 import { loadEnvFile } from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { createApp } from './app.ts'
-import { readGeminiConfig } from './config.ts'
+import { readGeminiConfig, readServerConfig } from './config.ts'
 import { createGeminiReplyGenerator } from './gemini.ts'
 
-// Only normal startup loads this file. Tests import the app and pure modules.
+// Production never reads local files for configuration.
 try {
-  loadEnvFile(fileURLToPath(new URL('./.env', import.meta.url)))
+  if (process.env.NODE_ENV?.trim() !== 'production') {
+    loadEnvFile(fileURLToPath(new URL('./.env', import.meta.url)))
+  }
 } catch (error) {
   if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) {
     console.error(
@@ -16,12 +18,19 @@ try {
   }
 }
 
+let config: ReturnType<typeof readServerConfig>
+try {
+  config = readServerConfig(process.env)
+} catch (error) {
+  console.error(
+    error instanceof Error ? error.message : 'Invalid server configuration.',
+  )
+  process.exit(1)
+}
+const { host, port } = config
 const generateReply = createGeminiReplyGenerator(readGeminiConfig(process.env))
 
-const host = '127.0.0.1'
-const port = 3001
-
-const server = createApp(generateReply).listen(port, host, () => {
+const server = createApp(generateReply, config).listen(port, host, () => {
   console.log(`Portfolio API: http://${host}:${port}`)
   console.log('Press Ctrl+C to stop the API.')
 })
